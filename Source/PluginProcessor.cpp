@@ -30,7 +30,7 @@ float EnvelopeFollower::process(float in)
 	return m_OutLast = m_AttackCoef * m_OutLast + m_One_Minus_AttackCoef * m_Out1Last;
 }
 
-const std::string CrestCompressorAudioProcessor::paramsNames[] = { "Attack", "Release", "Ratio", "Threshold", "Mix", "Volume" };
+const std::string CrestCompressorAudioProcessor::paramsNames[] = { "Smooth", "Lenght", "Attack", "Threshold", "Mix", "Volume" };
 const float CrestCompressorAudioProcessor::CREST_LIMIT = 50.0f;
 
 //==============================================================================
@@ -182,9 +182,14 @@ bool CrestCompressorAudioProcessor::isBusesLayoutSupported (const BusesLayout& l
 void CrestCompressorAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
 	// Get params
-	const auto attack = attackParameter->load();
+	const auto ratio = -1.0f * ratioParameter->load();
+	float attack = 0.0f;
+	if (ratio > 0)
+		attack = 200.0 - attackParameter->load();
+	else
+		attack = attackParameter->load();
 	const auto release = releaseParameter->load();
-	const auto ratio = ratioParameter->load();	
+		
 	const auto threshold = thresholdParameter->load();
 	const auto mix = mixParameter->load();
 	const auto volume = juce::Decibels::decibelsToGain(volumeParameter->load());
@@ -194,7 +199,7 @@ void CrestCompressorAudioProcessor::processBlock (juce::AudioBuffer<float>& buff
 	const float thresholdNormalized = threshold / CREST_LIMIT;
 	const float mixInverse = 1.0f - mix;
 	const int channels = getTotalNumOutputChannels();
-	const int samples = buffer.getNumSamples();		
+	const int samples = buffer.getNumSamples();	
 
 	for (int channel = 0; channel < channels; ++channel)
 	{
@@ -221,9 +226,10 @@ void CrestCompressorAudioProcessor::processBlock (juce::AudioBuffer<float>& buff
 			const float crestFactor = crestFactorCalculator.process(in);
 			const float crestFactorNormalized = std::min(crestFactor / CREST_LIMIT, 1.0f);
 			const float crestSkewed = powf(crestFactorNormalized, 0.5f);
-			
+
 			//Get gain reduction, positive values
-			const float attenuatedB = (crestSkewed >= thresholdNormalized) ? (crestSkewed - thresholdNormalized) * attenuationFactor : 0.0f;
+			float attenuatedB = (crestSkewed >= thresholdNormalized) ? (crestSkewed - thresholdNormalized) * attenuationFactor : 0.0f;
+			attenuatedB = std::min(fabsf(attenuatedB), 18.0f);
 
 			// Smooth
 			const float smoothdB = factor * envelopeFollower.process(attenuatedB);
@@ -280,7 +286,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout CrestCompressorAudioProcesso
 
 	using namespace juce;
 
-	layout.add(std::make_unique<juce::AudioParameterFloat>(paramsNames[0], paramsNames[0], NormalisableRange<float>( 0.01f, 200.0f, 0.01f, 0.5f),  10.0f));
+	layout.add(std::make_unique<juce::AudioParameterFloat>(paramsNames[0], paramsNames[0], NormalisableRange<float>( 0.01f, 200.0f, 0.01f, 0.5f),  0.01f));
 	layout.add(std::make_unique<juce::AudioParameterFloat>(paramsNames[1], paramsNames[1], NormalisableRange<float>( 0.01f, 200.0f, 0.01f, 0.5f), 100.0f));
 	layout.add(std::make_unique<juce::AudioParameterFloat>(paramsNames[2], paramsNames[2], NormalisableRange<float>(-24.0f,  24.0f,  1.0f, 1.0f),   0.0f));
 	layout.add(std::make_unique<juce::AudioParameterFloat>(paramsNames[3], paramsNames[3], NormalisableRange<float>(  0.0f, CREST_LIMIT,  1.0f, 1.0f), CREST_LIMIT * 0.5f));
