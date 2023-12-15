@@ -183,13 +183,8 @@ void CrestCompressorAudioProcessor::processBlock (juce::AudioBuffer<float>& buff
 {
 	// Get params
 	const auto ratio = -1.0f * ratioParameter->load();
-	float attack = 0.0f;
-	if (ratio > 0)
-		attack = 200.0 - attackParameter->load();
-	else
-		attack = attackParameter->load();
-	const auto release = releaseParameter->load();
-		
+	const float attack = (ratio > 0) ? 200.0 - attackParameter->load() : attackParameter->load();
+	const auto release = releaseParameter->load();		
 	const auto threshold = thresholdParameter->load();
 	const auto mix = mixParameter->load();
 	const auto volume = juce::Decibels::decibelsToGain(volumeParameter->load());

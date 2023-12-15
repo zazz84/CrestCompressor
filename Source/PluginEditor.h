@@ -25,6 +25,8 @@ public:
 	// GUI setup
 	static const int N_SLIDERS_COUNT = 6;
 	static const int SCALE = 70;
+	static const int SLIDER_WIDTH = 200;
+	static const int HUE = 10;
 
 #ifdef DEBUG
 	static const int MENU_HEIGHT = 60;
@@ -41,8 +43,6 @@ public:
 	typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
 
 private:
-    // This reference is provided as a quick way for your editor to
-    // access the processor object that created it.
     CrestCompressorAudioProcessor& audioProcessor;
 
 	juce::AudioProcessorValueTreeState& valueTreeState;
@@ -50,10 +50,6 @@ private:
 	juce::Label m_labels[N_SLIDERS_COUNT] = {};
 	juce::Slider m_sliders[N_SLIDERS_COUNT] = {};
 	std::unique_ptr<SliderAttachment> m_sliderAttachment[N_SLIDERS_COUNT] = {};
-
-	juce::Label automationTLabel;
-	juce::Label smoothingTypeLabel;
-	juce::Label detectionTypeLabel;
 
 #ifdef DEBUG
 	juce::Label gainReductionLabel;

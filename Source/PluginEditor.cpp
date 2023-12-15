@@ -13,6 +13,14 @@
 CrestCompressorAudioProcessorEditor::CrestCompressorAudioProcessorEditor (CrestCompressorAudioProcessor& p, juce::AudioProcessorValueTreeState& vts)
     : AudioProcessorEditor (&p), audioProcessor (p), valueTreeState(vts)
 {
+	juce::Colour light = juce::Colour::fromHSV(HUE * 0.01f, 0.5f, 0.6f, 1.0f);
+	juce::Colour medium = juce::Colour::fromHSV(HUE * 0.01f, 0.5f, 0.5f, 1.0f);
+	juce::Colour dark = juce::Colour::fromHSV(HUE * 0.01f, 0.5f, 0.4f, 1.0f);
+
+	getLookAndFeel().setColour(juce::Slider::thumbColourId, dark);
+	getLookAndFeel().setColour(juce::Slider::rotarySliderFillColourId, medium);
+	getLookAndFeel().setColour(juce::Slider::rotarySliderOutlineColourId, light);
+
 	for (int i = 0; i < N_SLIDERS_COUNT; i++)
 	{
 		auto& label = m_labels[i];
@@ -31,17 +39,6 @@ CrestCompressorAudioProcessorEditor::CrestCompressorAudioProcessorEditor (CrestC
 		m_sliderAttachment[i].reset(new SliderAttachment(valueTreeState, CrestCompressorAudioProcessor::paramsNames[i], slider));
 	}
 
-	//Label
-	smoothingTypeLabel.setText("Smoothing Type :", juce::dontSendNotification);
-	smoothingTypeLabel.setFont(juce::Font(22.0f * 0.01f * SCALE, juce::Font::plain));
-	smoothingTypeLabel.setJustificationType(juce::Justification::centred);
-	addAndMakeVisible(smoothingTypeLabel);
-
-	detectionTypeLabel.setText("Detection Type :", juce::dontSendNotification);
-	detectionTypeLabel.setFont(juce::Font(22.0f * 0.01f * SCALE, juce::Font::plain));
-	detectionTypeLabel.setJustificationType(juce::Justification::centred);
-	addAndMakeVisible(detectionTypeLabel);
-
 #if DEBUG
 	crestFactorLabel.setText("Crest: 0", juce::dontSendNotification);
 	crestFactorLabel.setFont(juce::Font(24.0f * 0.01f * SCALE, juce::Font::bold));
@@ -55,11 +52,11 @@ CrestCompressorAudioProcessorEditor::CrestCompressorAudioProcessorEditor (CrestC
 #endif
 
 #if DEBUG
-	setSize((int)(200.0f * 0.01f * SCALE * N_SLIDERS_COUNT), (int)(200.0f * 0.01f * SCALE) + MENU_HEIGHT);
+	setSize((int)(SLIDER_WIDTH * 0.01f * SCALE * N_SLIDERS_COUNT), (int)(SLIDER_WIDTH * 0.01f * SCALE) + MENU_HEIGHT);
 
 	startTimerHz(8);
 #else
-	setSize((int)(200.0f * 0.01f * SCALE * N_SLIDERS_COUNT), (int)(200.0f * 0.01f * SCALE));
+	setSize((int)(SLIDER_WIDTH * 0.01f * SCALE * N_SLIDERS_COUNT), (int)(SLIDER_WIDTH * 0.01f * SCALE));
 #endif
 }
 
@@ -83,7 +80,7 @@ void CrestCompressorAudioProcessorEditor::timerCallback()
 
 void CrestCompressorAudioProcessorEditor::paint (juce::Graphics& g)
 {
-	g.fillAll(juce::Colours::darkcyan);
+	g.fillAll(juce::Colour::fromHSV(HUE * 0.01f, 0.5f, 0.7f, 1.0f));
 }
 
 void CrestCompressorAudioProcessorEditor::resized()

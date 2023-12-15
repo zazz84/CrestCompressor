@@ -61,12 +61,6 @@ public:
     CrestCompressorAudioProcessor();
     ~CrestCompressorAudioProcessor() override;
 
-	enum automation
-	{
-		Manual = 1,
-		Auto,
-	};
-
 	static const std::string paramsNames[];
 	static const float CREST_LIMIT;
 
